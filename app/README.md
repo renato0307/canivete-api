@@ -21,3 +21,9 @@ Test container
 ```
 http localhost:8080
 ```
+
+## Run locally
+
+```
+go run main.go
+```

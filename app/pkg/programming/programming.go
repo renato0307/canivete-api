@@ -14,24 +14,25 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package main
+package programming
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/renato0307/canivete-api/pkg/programming"
-	programmingcore "github.com/renato0307/canivete-core/pkg/programming"
+	"github.com/renato0307/canivete-core/interface/programming"
 )
 
-func main() {
-	r := gin.Default()
-	r.GET("/", func(c *gin.Context) {
-		c.String(200, "Welcome to canivete-api!")
-	})
+func SetRouterGroup(p programming.Interface, base *gin.RouterGroup) *gin.RouterGroup {
+	programmingGroup := base.Group("/programming")
+	{
+		programmingGroup.GET("/uuid", getUuid(p))
+	}
 
-	v1 := r.Group("/v1")
+	return programmingGroup
+}
 
-	prog := programmingcore.Service{}
-	programming.SetRouterGroup(&prog, v1)
-
-	r.Run()
+func getUuid(p programming.Interface) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		output := p.NewUuid()
+		c.JSON(200, output)
+	}
 }
