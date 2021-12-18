@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: canivete-api
+  name: canivete-api
+  namespace: canivete
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: canivete-api
+  template:
+    metadata:
+      labels:
+        run: canivete-api
+    spec:
+      containers:
+      - name: canivete-api
+        image: 172.19.255.222:5000/canivete-api:latest
+        ports:
+        - containerPort: 8080
+        resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 500m
+              memory: 128Mi
+      imagePullSecrets:
+      - name: regcred
