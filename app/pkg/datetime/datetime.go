@@ -24,8 +24,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/renato0307/canivete-api/pkg/apierrors"
+	"github.com/renato0307/canivete-api/pkg/logging"
 	"github.com/renato0307/canivete-core/interface/datetime"
+	"go.uber.org/zap"
 )
+
+var logger *zap.SugaredLogger = logging.GetLogger()
 
 func SetRouterGroup(p datetime.Interface, base *gin.RouterGroup) *gin.RouterGroup {
 	programmingGroup := base.Group("/datetime")
@@ -47,6 +51,7 @@ func postFromUnix(p datetime.Interface) gin.HandlerFunc {
 		unitTimestampString := strings.TrimRight(string(unitTimestampBody), "\n")
 		unixTimestamp, err := strconv.ParseInt(unitTimestampString, 10, 64)
 		if err != nil {
+			logger.Debugw("bad request for converting a unix timestamp to utc", "error", err.Error())
 			c.JSON(http.StatusBadRequest, apierrors.ApiError{Message: "unix timestamp must be an integer number"})
 			return
 		}

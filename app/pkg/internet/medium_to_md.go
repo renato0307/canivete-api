@@ -23,8 +23,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/renato0307/canivete-api/pkg/apierrors"
+	"github.com/renato0307/canivete-api/pkg/logging"
 	"github.com/renato0307/canivete-core/interface/internet"
+	"go.uber.org/zap"
 )
+
+var logger *zap.SugaredLogger = logging.GetLogger()
 
 func SetRouterGroup(i internet.Interface, base *gin.RouterGroup) *gin.RouterGroup {
 	programmingGroup := base.Group("/internet")
@@ -57,6 +61,7 @@ func postConvertMediumToMd(i internet.Interface) gin.HandlerFunc {
 		postId := strings.TrimRight(string(postIdBytes), "\n")
 		output, err := i.ConvertMediumToMd(postId)
 		if err != nil {
+			logger.Debugw("error converting a medium post to markdown", "error", err.Error())
 			c.JSON(http.StatusInternalServerError, apierrors.ApiError{Message: err.Error()})
 			return
 		}

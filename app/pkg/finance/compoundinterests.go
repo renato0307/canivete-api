@@ -24,8 +24,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/renato0307/canivete-api/pkg/apierrors"
+	"github.com/renato0307/canivete-api/pkg/logging"
 	"github.com/renato0307/canivete-core/interface/finance"
+	"go.uber.org/zap"
 )
+
+var logger *zap.SugaredLogger = logging.GetLogger()
 
 type calculateCompoundInterestsInput struct {
 	InterestRate               float64 `validate:"required"`
@@ -63,6 +67,7 @@ func postCalculateCompoundInterests(f finance.Interface) gin.HandlerFunc {
 		validate := validator.New()
 		err = validate.Struct(input)
 		if err != nil {
+			logger.Debugw("bad request received for compound interests calculation", "error", err.Error())
 			c.JSON(http.StatusBadRequest, apierrors.ApiError{Message: err.Error()})
 			return
 		}
@@ -76,6 +81,7 @@ func postCalculateCompoundInterests(f finance.Interface) gin.HandlerFunc {
 			input.InterestRate,
 		)
 		if err != nil {
+			logger.Debugw("error while calculating compound interests", "error", err.Error())
 			c.JSON(http.StatusInternalServerError, apierrors.ApiError{Message: "unexpected error calculating interests: " + err.Error()})
 			return
 		}

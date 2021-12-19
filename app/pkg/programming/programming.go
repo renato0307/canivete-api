@@ -22,8 +22,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/renato0307/canivete-api/pkg/apierrors"
+	"github.com/renato0307/canivete-api/pkg/logging"
 	"github.com/renato0307/canivete-core/interface/programming"
+	"go.uber.org/zap"
 )
+
+var logger *zap.SugaredLogger = logging.GetLogger()
 
 func SetRouterGroup(p programming.Interface, base *gin.RouterGroup) *gin.RouterGroup {
 	programmingGroup := base.Group("/programming")
@@ -39,7 +43,9 @@ func SetRouterGroup(p programming.Interface, base *gin.RouterGroup) *gin.RouterG
 // It returns 200 on success.
 func getUuid(p programming.Interface) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		logger.Debugw("getting a new UUID")
 		output := p.NewUuid()
+		logger.Debugw("new UUID created", "uuid", output.UUID)
 		c.JSON(http.StatusOK, output)
 	}
 }
@@ -61,6 +67,7 @@ func postJwtDebugger(p programming.Interface) gin.HandlerFunc {
 
 		output, err := p.DebugJwt(string(tokenString))
 		if err != nil {
+			logger.Debugw("error debugging a jwt", "error", err.Error())
 			c.JSON(http.StatusBadRequest, apierrors.ApiError{Message: err.Error()})
 			return
 		}
