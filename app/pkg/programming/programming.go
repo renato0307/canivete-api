@@ -17,7 +17,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package programming
 
 import (
+	"io/ioutil"
+
 	"github.com/gin-gonic/gin"
+	"github.com/renato0307/canivete-api/pkg/apierrors"
 	"github.com/renato0307/canivete-core/interface/programming"
 )
 
@@ -25,14 +28,42 @@ func SetRouterGroup(p programming.Interface, base *gin.RouterGroup) *gin.RouterG
 	programmingGroup := base.Group("/programming")
 	{
 		programmingGroup.GET("/uuid", getUuid(p))
+		programmingGroup.POST("/jwt-debugger", postJwtDebugger(p))
 	}
 
 	return programmingGroup
 }
 
+// getUuid handles the uuid request.
+// It returns 200 on success.
 func getUuid(p programming.Interface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		output := p.NewUuid()
+		c.JSON(200, output)
+	}
+}
+
+// postJwtDebugger handles the jwt-debugger request.
+// It returns 500 if anything fails and a 200 otherwise.
+func postJwtDebugger(p programming.Interface) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.Request.Body == nil {
+			c.JSON(500, apierrors.ApiError{Message: "request body is invalid"})
+			return
+		}
+
+		tokenString, err := ioutil.ReadAll(c.Request.Body)
+		if err != nil {
+			c.JSON(500, apierrors.ApiError{Message: "request body is invalid"})
+			return
+		}
+
+		output, err := p.DebugJwt(string(tokenString))
+		if err != nil {
+			c.JSON(500, apierrors.ApiError{Message: err.Error()})
+			return
+		}
+
 		c.JSON(200, output)
 	}
 }
