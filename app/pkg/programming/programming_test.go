@@ -18,6 +18,7 @@ package programming
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -32,6 +33,20 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+var validTokenString *strings.Reader = strings.NewReader(
+	fmt.Sprintf("%s.%s.%s",
+		"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9",
+		"eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTYzOTgyODY0NiwiZXhwIjoxNjM5ODMyMjQ2fQ",
+		"ujQ7wTsos4hYgipdnxSjLICDdfSLq9pYbpwS0WvUKc4"))
+
+func setupGin(serviceMock *programmingmocks.Interface) *gin.Engine {
+	r := gin.Default()
+	v1 := r.Group("/v1")
+	SetRouterGroup(serviceMock, v1)
+
+	return r
+}
+
 func TestGetUuid(t *testing.T) {
 	// arrange
 	uuid := "d967aaad-1df5-485d-96b4-43d4247972e7"
@@ -40,13 +55,9 @@ func TestGetUuid(t *testing.T) {
 	serviceMock := programmingmocks.Interface{}
 	serviceMock.On("NewUuid", mock.Anything).Return(output, nil)
 
-	r := gin.Default()
-	v1 := r.Group("/v1")
-	SetRouterGroup(&serviceMock, v1)
-
+	r := setupGin(&serviceMock)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/v1/programming/uuid", nil)
-	req.Header.Add("Content-Type", "application/json")
 
 	// act
 	r.ServeHTTP(w, req)
@@ -57,8 +68,6 @@ func TestGetUuid(t *testing.T) {
 
 func TestPostJwtDebugger(t *testing.T) {
 	// arrange
-	tokenString := "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTYzOTgyODY0NiwiZXhwIjoxNjM5ODMyMjQ2fQ.ujQ7wTsos4hYgipdnxSjLICDdfSLq9pYbpwS0WvUKc4"
-
 	output := programming.JwtDebuggerOutput{
 		Header: map[string]interface{}{
 			"alg": "HS256",
@@ -76,13 +85,9 @@ func TestPostJwtDebugger(t *testing.T) {
 	serviceMock := programmingmocks.Interface{}
 	serviceMock.On("DebugJwt", mock.Anything).Return(output, nil)
 
-	r := gin.Default()
-	v1 := r.Group("/v1")
-	SetRouterGroup(&serviceMock, v1)
-
+	r := setupGin(&serviceMock)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/v1/programming/jwt-debugger", strings.NewReader(tokenString))
-	req.Header.Add("Content-Type", "application/json")
+	req, _ := http.NewRequest("POST", "/v1/programming/jwt-debugger", validTokenString)
 
 	// act
 	r.ServeHTTP(w, req)
@@ -95,13 +100,9 @@ func TestPostJwtDebuggerNoBodyShouldReturn500(t *testing.T) {
 	// arrange
 	serviceMock := programmingmocks.Interface{}
 
-	r := gin.Default()
-	v1 := r.Group("/v1")
-	SetRouterGroup(&serviceMock, v1)
-
+	r := setupGin(&serviceMock)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/v1/programming/jwt-debugger", nil)
-	req.Header.Add("Content-Type", "application/json")
 
 	// act
 	r.ServeHTTP(w, req)
@@ -116,20 +117,15 @@ func TestPostJwtDebuggerNoBodyShouldReturn500(t *testing.T) {
 
 func TestPostJwtDebuggerShouldReturn500IfCoreFails(t *testing.T) {
 	// arrange
-	tokenString := "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTYzOTgyODY0NiwiZXhwIjoxNjM5ODMyMjQ2fQ.ujQ7wTsos4hYgipdnxSjLICDdfSLq9pYbpwS0WvUKc4"
 	output := programming.JwtDebuggerOutput{}
 	error := errors.New("fake error")
 
 	serviceMock := programmingmocks.Interface{}
 	serviceMock.On("DebugJwt", mock.Anything).Return(output, error)
 
-	r := gin.Default()
-	v1 := r.Group("/v1")
-	SetRouterGroup(&serviceMock, v1)
-
+	r := setupGin(&serviceMock)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/v1/programming/jwt-debugger", strings.NewReader(tokenString))
-	req.Header.Add("Content-Type", "application/json")
+	req, _ := http.NewRequest("POST", "/v1/programming/jwt-debugger", validTokenString)
 
 	// act
 	r.ServeHTTP(w, req)
