@@ -25,9 +25,12 @@ type ApiError struct {
 	Message string
 }
 
-func FromResponseRecorder(w *httptest.ResponseRecorder) ApiError {
+func FromResponseRecorder(w *httptest.ResponseRecorder) (ApiError, error) {
 	apiError := ApiError{}
-	json.Unmarshal(w.Body.Bytes(), &apiError)
+	err := json.Unmarshal(w.Body.Bytes(), &apiError)
+	if err != nil {
+		return apiError, err
+	}
 
-	return apiError
+	return apiError, nil
 }

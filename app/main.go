@@ -17,26 +17,42 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package main
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/renato0307/canivete-api/pkg/datetime"
+	"github.com/renato0307/canivete-api/pkg/finance"
 	"github.com/renato0307/canivete-api/pkg/programming"
 	datetimecore "github.com/renato0307/canivete-core/pkg/datetime"
+	financecore "github.com/renato0307/canivete-core/pkg/finance"
 	programmingcore "github.com/renato0307/canivete-core/pkg/programming"
 )
 
 func main() {
+
 	r := gin.Default()
+	err := r.SetTrustedProxies(nil) // https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies
+	if err != nil {
+		log.Fatalf("error setting trusted proxies to nil: %s\n", err.Error())
+	}
+
 	r.GET("/", func(c *gin.Context) {
 		c.String(200, "Welcome to canivete-api!")
 	})
 
 	v1 := r.Group("/v1")
 
-	prog := programmingcore.Service{}
-	programming.SetRouterGroup(&prog, v1)
+	programmingService := programmingcore.Service{}
+	programming.SetRouterGroup(&programmingService, v1)
 
-	dt := datetimecore.Service{}
-	datetime.SetRouterGroup(&dt, v1)
+	datetimeService := datetimecore.Service{}
+	datetime.SetRouterGroup(&datetimeService, v1)
 
-	r.Run()
+	financeService := financecore.Service{}
+	finance.SetRouterGroup(&financeService, v1)
+
+	err = r.Run()
+	if err != nil {
+		log.Fatalf("error running gin: %s\n", err.Error())
+	}
 }

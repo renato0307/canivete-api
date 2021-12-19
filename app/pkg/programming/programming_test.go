@@ -110,7 +110,7 @@ func TestPostJwtDebuggerNoBodyShouldReturn500(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	expectedError := apierrors.ApiError{Message: "request body is invalid"}
-	apiError := apierrors.FromResponseRecorder(w)
+	apiError, _ := apierrors.FromResponseRecorder(w)
 	assert.Equal(t, expectedError, apiError)
 }
 
@@ -133,6 +133,6 @@ func TestPostJwtDebuggerShouldReturn500IfCoreFails(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	expectedError := apierrors.ApiError{Message: error.Error()}
-	apiError := apierrors.FromResponseRecorder(w)
+	apiError, _ := apierrors.FromResponseRecorder(w)
 	assert.Equal(t, expectedError, apiError)
 }

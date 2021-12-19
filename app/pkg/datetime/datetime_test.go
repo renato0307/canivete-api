@@ -101,6 +101,6 @@ func TestPostFromUnixWithInvalidTimestamp(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	expectedError := apierrors.ApiError{Message: error.Error()}
-	apiError := apierrors.FromResponseRecorder(w)
+	apiError, _ := apierrors.FromResponseRecorder(w)
 	assert.Equal(t, expectedError, apiError)
 }

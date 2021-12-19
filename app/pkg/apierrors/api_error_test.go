@@ -33,7 +33,13 @@ func TestFromResponseRecorder(t *testing.T) {
 		Body: bytes.NewBuffer([]byte(errorText)),
 	}
 
-	apiError := FromResponseRecorder(&response)
+	apiError, _ := FromResponseRecorder(&response)
 
 	assert.Equal(t, message, apiError.Message)
+}
+
+func TestFromResponseRecorderWithInvalidData(t *testing.T) {
+	response := httptest.ResponseRecorder{Body: bytes.NewBuffer([]byte(""))}
+	_, err := FromResponseRecorder(&response)
+	assert.NotNil(t, err)
 }

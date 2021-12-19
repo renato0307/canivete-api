@@ -17,7 +17,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package datetime
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -46,7 +45,6 @@ func postFromUnix(p datetime.Interface) gin.HandlerFunc {
 		}
 
 		unitTimestampString := strings.TrimRight(string(unitTimestampBody), "\n")
-		fmt.Println(string(unitTimestampBody))
 		unixTimestamp, err := strconv.ParseInt(unitTimestampString, 10, 64)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, apierrors.ApiError{Message: "unix timestamp must be an integer number"})
