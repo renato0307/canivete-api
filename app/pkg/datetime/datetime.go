@@ -17,9 +17,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package datetime
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/renato0307/canivete-api/pkg/apierrors"
@@ -37,13 +39,15 @@ func SetRouterGroup(p datetime.Interface, base *gin.RouterGroup) *gin.RouterGrou
 
 func postFromUnix(p datetime.Interface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		unitTimestampString, err := ioutil.ReadAll(c.Request.Body)
+		unitTimestampBody, err := ioutil.ReadAll(c.Request.Body)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, apierrors.ApiError{Message: "request body is invalid"})
 			return
 		}
 
-		unixTimestamp, err := strconv.ParseInt(string(unitTimestampString), 10, 64)
+		unitTimestampString := strings.TrimRight(string(unitTimestampBody), "\n")
+		fmt.Println(string(unitTimestampBody))
+		unixTimestamp, err := strconv.ParseInt(unitTimestampString, 10, 64)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, apierrors.ApiError{Message: "unix timestamp must be an integer number"})
 			return

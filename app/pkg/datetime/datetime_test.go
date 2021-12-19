@@ -62,6 +62,28 @@ func TestPostFromUnix(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+func TestPostFromUnixWithCarriageReturn(t *testing.T) {
+	output := datetime.FromUnixTimestampOutput{
+		UnixTimestamp: 1638964800,
+		UtcTimestamp:  "Wed Dec  8 12:00:00 UTC 2021",
+	}
+
+	// arrange
+	serviceMock := datetime.MockInterface{}
+	serviceMock.On("FromUnitTimestamp", mock.Anything).Return(output, nil)
+
+	r := setupGin(&serviceMock)
+	w := httptest.NewRecorder()
+	body := strings.NewReader(strconv.FormatInt(output.UnixTimestamp, 10) + "\n")
+	req, _ := http.NewRequest("POST", "/v1/datetime/fromunix", body)
+
+	// act
+	r.ServeHTTP(w, req)
+
+	// assert
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
 func TestPostFromUnixWithInvalidTimestamp(t *testing.T) {
 	// arrange
 	error := errors.New("unix timestamp must be an integer number")
