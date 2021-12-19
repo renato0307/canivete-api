@@ -5,7 +5,7 @@ go 1.17
 require github.com/gin-gonic/gin v1.7.7
 
 require (
-	github.com/renato0307/canivete-core v0.0.5
+	github.com/renato0307/canivete-core v0.0.6
 	github.com/stretchr/testify v1.7.0
 )
 

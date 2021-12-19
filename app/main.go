@@ -18,7 +18,9 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/renato0307/canivete-api/pkg/datetime"
 	"github.com/renato0307/canivete-api/pkg/programming"
+	datetimecore "github.com/renato0307/canivete-core/pkg/datetime"
 	programmingcore "github.com/renato0307/canivete-core/pkg/programming"
 )
 
@@ -32,6 +34,9 @@ func main() {
 
 	prog := programmingcore.Service{}
 	programming.SetRouterGroup(&prog, v1)
+
+	dt := datetimecore.Service{}
+	datetime.SetRouterGroup(&dt, v1)
 
 	r.Run()
 }

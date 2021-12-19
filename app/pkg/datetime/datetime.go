@@ -14,57 +14,42 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-package programming
+package datetime
 
 import (
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/renato0307/canivete-api/pkg/apierrors"
-	"github.com/renato0307/canivete-core/interface/programming"
+	"github.com/renato0307/canivete-core/interface/datetime"
 )
 
-func SetRouterGroup(p programming.Interface, base *gin.RouterGroup) *gin.RouterGroup {
-	programmingGroup := base.Group("/programming")
+func SetRouterGroup(p datetime.Interface, base *gin.RouterGroup) *gin.RouterGroup {
+	programmingGroup := base.Group("/datetime")
 	{
-		programmingGroup.GET("/uuid", getUuid(p))
-		programmingGroup.POST("/jwt-debugger", postJwtDebugger(p))
+		programmingGroup.POST("/fromunix", postFromUnix(p))
 	}
 
 	return programmingGroup
 }
 
-// getUuid handles the uuid request.
-// It returns 200 on success.
-func getUuid(p programming.Interface) gin.HandlerFunc {
+func postFromUnix(p datetime.Interface) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		output := p.NewUuid()
-		c.JSON(http.StatusOK, output)
-	}
-}
-
-// postJwtDebugger handles the jwt-debugger request.
-// It returns 500 if anything fails and a 200 otherwise.
-func postJwtDebugger(p programming.Interface) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if c.Request.Body == nil {
-			c.JSON(http.StatusBadRequest, apierrors.ApiError{Message: "request body is invalid"})
-			return
-		}
-
-		tokenString, err := ioutil.ReadAll(c.Request.Body)
+		unitTimestampString, err := ioutil.ReadAll(c.Request.Body)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, apierrors.ApiError{Message: "request body is invalid"})
 			return
 		}
 
-		output, err := p.DebugJwt(string(tokenString))
+		unixTimestamp, err := strconv.ParseInt(string(unitTimestampString), 10, 64)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, apierrors.ApiError{Message: err.Error()})
+			c.JSON(http.StatusBadRequest, apierrors.ApiError{Message: "unix timestamp must be an integer number"})
 			return
 		}
 
-		c.JSON(200, output)
+		output := p.FromUnitTimestamp(unixTimestamp)
+		c.JSON(http.StatusOK, output)
 	}
 }

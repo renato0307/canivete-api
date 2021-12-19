@@ -28,7 +28,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/renato0307/canivete-api/pkg/apierrors"
 	"github.com/renato0307/canivete-core/interface/programming"
-	programmingmocks "github.com/renato0307/canivete-core/interface/programming/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -39,7 +38,7 @@ var validTokenString *strings.Reader = strings.NewReader(
 		"eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTYzOTgyODY0NiwiZXhwIjoxNjM5ODMyMjQ2fQ",
 		"ujQ7wTsos4hYgipdnxSjLICDdfSLq9pYbpwS0WvUKc4"))
 
-func setupGin(serviceMock *programmingmocks.Interface) *gin.Engine {
+func setupGin(serviceMock *programming.MockInterface) *gin.Engine {
 	r := gin.Default()
 	v1 := r.Group("/v1")
 	SetRouterGroup(serviceMock, v1)
@@ -52,7 +51,7 @@ func TestGetUuid(t *testing.T) {
 	uuid := "d967aaad-1df5-485d-96b4-43d4247972e7"
 	output := programming.UuidOutput{UUID: uuid}
 
-	serviceMock := programmingmocks.Interface{}
+	serviceMock := programming.MockInterface{}
 	serviceMock.On("NewUuid", mock.Anything).Return(output, nil)
 
 	r := setupGin(&serviceMock)
@@ -82,7 +81,7 @@ func TestPostJwtDebugger(t *testing.T) {
 		},
 	}
 
-	serviceMock := programmingmocks.Interface{}
+	serviceMock := programming.MockInterface{}
 	serviceMock.On("DebugJwt", mock.Anything).Return(output, nil)
 
 	r := setupGin(&serviceMock)
@@ -98,7 +97,7 @@ func TestPostJwtDebugger(t *testing.T) {
 
 func TestPostJwtDebuggerNoBodyShouldReturn500(t *testing.T) {
 	// arrange
-	serviceMock := programmingmocks.Interface{}
+	serviceMock := programming.MockInterface{}
 
 	r := setupGin(&serviceMock)
 	w := httptest.NewRecorder()
@@ -108,7 +107,7 @@ func TestPostJwtDebuggerNoBodyShouldReturn500(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	// assert
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	expectedError := apierrors.ApiError{Message: "request body is invalid"}
 	apiError := apierrors.FromResponseRecorder(w)
@@ -120,7 +119,7 @@ func TestPostJwtDebuggerShouldReturn500IfCoreFails(t *testing.T) {
 	output := programming.JwtDebuggerOutput{}
 	error := errors.New("fake error")
 
-	serviceMock := programmingmocks.Interface{}
+	serviceMock := programming.MockInterface{}
 	serviceMock.On("DebugJwt", mock.Anything).Return(output, error)
 
 	r := setupGin(&serviceMock)
@@ -131,7 +130,7 @@ func TestPostJwtDebuggerShouldReturn500IfCoreFails(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	// assert
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	expectedError := apierrors.ApiError{Message: error.Error()}
 	apiError := apierrors.FromResponseRecorder(w)
