@@ -8,9 +8,14 @@ Create the namespace
 kubectl create ns canivete
 ```
 
-Create the deployment and service
+Install Helm chart
 
 ```
-kubectl apply -f canivete-rest-deployment.yaml
-kubectl apply -f canivete-rest-service.yaml
+helm install canivete-api-chart ./api-chart --namespace canivete
+```
+
+Delete Helm chart
+
+```
+helm uninstall canivete-api-chart --namespace canivete
 ```
