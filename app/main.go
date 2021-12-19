@@ -22,9 +22,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/renato0307/canivete-api/pkg/datetime"
 	"github.com/renato0307/canivete-api/pkg/finance"
+	"github.com/renato0307/canivete-api/pkg/internet"
 	"github.com/renato0307/canivete-api/pkg/programming"
 	datetimecore "github.com/renato0307/canivete-core/pkg/datetime"
 	financecore "github.com/renato0307/canivete-core/pkg/finance"
+	internetcore "github.com/renato0307/canivete-core/pkg/internet"
 	programmingcore "github.com/renato0307/canivete-core/pkg/programming"
 )
 
@@ -50,6 +52,9 @@ func main() {
 
 	financeService := financecore.Service{}
 	finance.SetRouterGroup(&financeService, v1)
+
+	internetService := internetcore.Service{}
+	internet.SetRouterGroup(&internetService, v1)
 
 	err = r.Run()
 	if err != nil {

@@ -6,7 +6,7 @@ require github.com/gin-gonic/gin v1.7.7
 
 require (
 	github.com/go-playground/validator/v10 v10.9.0
-	github.com/renato0307/canivete-core v0.0.7
+	github.com/renato0307/canivete-core v0.0.9
 	github.com/stretchr/testify v1.7.0
 )
 
